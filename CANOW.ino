@@ -21,6 +21,7 @@ WiFiClient client;
 MCP_CAN CAN(HSPI_CS);  
 
 void setup() {
+  client.setNoDelay(true);
   /* Start WiFi SoftAP */
   WiFi.softAP(ssid, password);
   Serial.begin(115200);
@@ -66,7 +67,7 @@ void loop()
         captured_n++;
       }
   }
-  if(millis() >= currTime + 1000)
+  if(millis() >= currTime + 100)
   {
     currTime = millis();
     for(int i = 0; i < captured_n; i++)
@@ -78,7 +79,6 @@ void loop()
       client.write((uint8_t *)buffSend, 14);
     }
     Serial.printf("Received %d messages.\n", captured_n);
-    client.flush();
     memset(canMsg, 0x00, sizeof(canMsg_t)*BUFF_LEN);
     captured_n = 0;
   }

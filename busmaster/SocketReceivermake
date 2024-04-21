@@ -16,9 +16,9 @@ DBINCLUDES =
 all: $(dll)
 
 $(dll): SocketReceiver.o
-	$(CXX) -shared -Wl,--dll  SocketReceiver.o $(DBOBJFILE) $(BM_LIB) -o $@
+	$(CXX) -shared -Wl,--dll SocketReceiver.o $(DBOBJFILE) $(BM_LIB) -o $@
 
-SocketReceiver.o: C:/Users/Alex/DOCUME~1/CANOW/BUSMAS~1/SOCKET~1.CPP
+SocketReceiver.o: C:/Users/ALESSA~1.D'A/DOCUME~1/CANOW/BUSMAS~1/SOCKET~1.CPP
 	$(CXX) $(DBINCLUDES) $(CXXFLAGS) $(BM_INCLUDES) $< -o $@
 
 clean: 

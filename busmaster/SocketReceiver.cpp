@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <winsock2.h>
 /* End BUSMASTER include header */
-#define DEFAULT_BUFLEN 128
+#define DEFAULT_BUFLEN 4096
 
 /* Start BUSMASTER global variable */
 WSADATA wsa;
