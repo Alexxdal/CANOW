@@ -24,7 +24,7 @@ void setup() {
   /* Start WiFi SoftAP */
   WiFi.softAP(ssid, password);
   Serial.begin(115200);
-  while (CAN_OK != CAN.begin(CAN_500KBPS))    // set 250 at 16mhz so at 8mhz is 500
+  while (CAN_OK != CAN.begin(CAN_125KBPS))    // set 250 at 16mhz so at 8mhz is 500
   {
       Serial.println("CAN BUS FAIL!");
       delay(500);
@@ -35,6 +35,7 @@ void setup() {
     Serial.println("Connection to host failed");
     delay(1000);
   }
+  Serial.println("Connected to Host");
 }
 
 unsigned char buffSend[13] = { 0 };
@@ -45,8 +46,9 @@ void loop() {
   {
       CAN.readMsgBuf(&len, buf);    // read data,  len: data length, buf: data buf
       unsigned long canId = CAN.getCanId();
+      unsigned char isExt = CAN.isExtendedFrame();
       Serial.println("-----------------------------");
-      Serial.print("Get data from ID: ");
+      Serial.printf("Ext: %d Get data from ID: ", isExt);
       Serial.println(canId, HEX);
 
       memcpy(&buffSend[0], &canId, 4);
@@ -61,5 +63,4 @@ void loop() {
       }
       Serial.println();
   }
-  delay(1000);
 }
