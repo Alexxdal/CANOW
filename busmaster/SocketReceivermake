@@ -1,0 +1,25 @@
+CXX = mingw32-g++
+BM_LIB = -L"C:\Program Files (x86)\BUSMASTER_v3.2.2\SimulatedSystems\OBJ" -lWrapper_CAN -lws2_32
+
+BM_INCLUDES = -I"C:\Program Files (x86)\BUSMASTER_v3.2.2\SimulatedSystems\Include"
+
+CXXFLAGS = -Wall -c
+#$(BM_INCLUDE)
+
+dll = SocketReceiver.dll
+
+DBOBJFILE = 
+
+DBINCLUDES = 
+
+
+all: $(dll)
+
+$(dll): SocketReceiver.o
+	$(CXX) -shared -Wl,--dll  SocketReceiver.o $(DBOBJFILE) $(BM_LIB) -o $@
+
+SocketReceiver.o: C:/Users/Alex/DOCUME~1/CANOW/BUSMAS~1/SOCKET~1.CPP
+	$(CXX) $(DBINCLUDES) $(CXXFLAGS) $(BM_INCLUDES) $< -o $@
+
+clean: 
+	del /f SocketReceiver.o

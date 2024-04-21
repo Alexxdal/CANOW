@@ -38,7 +38,7 @@ void setup() {
   Serial.println("Connected to Host");
 }
 
-typedef struct {
+typedef struct __attribute((packed)){
   unsigned long id;
   unsigned char ext;
   unsigned char len;
@@ -49,7 +49,7 @@ typedef struct {
 uint16_t captured_n = 0;
 canMsg_t canMsg[BUFF_LEN] = { 0 };
 
-unsigned char buffSend[13] = { 0 };
+unsigned char buffSend[14] = { 0 };
 unsigned char len = 0;
 unsigned char buf[8] = { 0 };
 unsigned long currTime = 0;
@@ -72,9 +72,10 @@ void loop()
     for(int i = 0; i < captured_n; i++)
     {
       memcpy(&buffSend[0], &canMsg[i].id, 4);
-      memcpy(&buffSend[4], &canMsg[i].len, 1);
-      memcpy(&buffSend[5], canMsg[i].data, 8);
-      client.write((uint8_t *)buffSend, 13);
+      memcpy(&buffSend[4], &canMsg[i].ext, 1);
+      memcpy(&buffSend[5], &canMsg[i].len, 1);
+      memcpy(&buffSend[6], canMsg[i].data, 8);
+      client.write((uint8_t *)buffSend, 14);
     }
     Serial.printf("Received %d messages.\n", captured_n);
     client.flush();
