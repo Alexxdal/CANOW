@@ -23,8 +23,8 @@ MCP_CAN CAN(HSPI_CS);
 void setup() {
   /* Start WiFi SoftAP */
   WiFi.softAP(ssid, password);
-  Serial.begin(9600);
-  while (CAN_OK != CAN.begin(CAN_500KBPS))    // init can bus : baudrate = 500k
+  Serial.begin(115200);
+  while (CAN_OK != CAN.begin(CAN_500KBPS))    // set 250 at 16mhz so at 8mhz is 500
   {
       Serial.println("CAN BUS FAIL!");
       delay(500);

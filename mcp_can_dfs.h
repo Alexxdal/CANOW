@@ -213,31 +213,54 @@
 #define MCP_WAKIF       0x40
 #define MCP_MERRF       0x80
 
-// speed 16M
-
+/* speed 16M */
 #define MCP_16MHz_1000kBPS_CFG1 (0x00)
 #define MCP_16MHz_1000kBPS_CFG2 (0xD0)
 #define MCP_16MHz_1000kBPS_CFG3 (0x82)
-
+/* speed 8M */
+#define MCP_8MHz_1000kBPS_CFG1 (0x00)
+#define MCP_8MHz_1000kBPS_CFG2 (0x80)
+#define MCP_8MHz_1000kBPS_CFG3 (0x00)
+/* speed 16M */
 #define MCP_16MHz_500kBPS_CFG1 (0x00)
 #define MCP_16MHz_500kBPS_CFG2 (0xF0)
 #define MCP_16MHz_500kBPS_CFG3 (0x86)
-
+/* speed 8M */
+#define MCP_8MHz_500kBPS_CFG1 (0x00)
+#define MCP_8MHz_500kBPS_CFG2 (0x90)
+#define MCP_8MHz_500kBPS_CFG3 (0x02)
+/* speed 16M */
 #define MCP_16MHz_250kBPS_CFG1 (0x41)
 #define MCP_16MHz_250kBPS_CFG2 (0xF1)
 #define MCP_16MHz_250kBPS_CFG3 (0x85)
-
+/* speed 8M */
+#define MCP_8MHz_250kBPS_CFG1 (0x00)
+#define MCP_8MHz_250kBPS_CFG2 (0xB1)
+#define MCP_8MHz_250kBPS_CFG3 (0x05)
+/* speed 16M */
 #define MCP_16MHz_200kBPS_CFG1 (0x01)
 #define MCP_16MHz_200kBPS_CFG2 (0xFA)
 #define MCP_16MHz_200kBPS_CFG3 (0x87)
-
+/* speed 8M */
+#define MCP_8MHz_200kBPS_CFG1 (0x00)
+#define MCP_8MHz_200kBPS_CFG2 (0xB4)
+#define MCP_8MHz_200kBPS_CFG3 (0x06)
+/* speed 16M */
 #define MCP_16MHz_125kBPS_CFG1 (0x03)
 #define MCP_16MHz_125kBPS_CFG2 (0xF0)
 #define MCP_16MHz_125kBPS_CFG3 (0x86)
-
+/* speed 8M */
+#define MCP_8MHz_125kBPS_CFG1 (0x01)
+#define MCP_8MHz_125kBPS_CFG2 (0xB1)
+#define MCP_8MHz_125kBPS_CFG3 (0x05)
+/* speed 16M */
 #define MCP_16MHz_100kBPS_CFG1 (0x03)
 #define MCP_16MHz_100kBPS_CFG2 (0xFA)
 #define MCP_16MHz_100kBPS_CFG3 (0x87)
+/* speed 8M */
+#define MCP_8MHz_100kBPS_CFG1 (0x01)
+#define MCP_8MHz_100kBPS_CFG2 (0xB4)
+#define MCP_8MHz_100kBPS_CFG3 (0x06)
 
 #define MCP_16MHz_95kBPS_CFG1 (0x03)
 #define MCP_16MHz_95kBPS_CFG2 (0xAD)
