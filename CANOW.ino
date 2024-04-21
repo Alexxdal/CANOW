@@ -38,29 +38,47 @@ void setup() {
   Serial.println("Connected to Host");
 }
 
+typedef struct {
+  unsigned long id;
+  unsigned char ext;
+  unsigned char len;
+  unsigned char data[8];
+} canMsg_t;
+
+#define BUFF_LEN 200
+uint16_t captured_n = 0;
+canMsg_t canMsg[BUFF_LEN] = { 0 };
+
 unsigned char buffSend[13] = { 0 };
-void loop() {
-  unsigned char len = 0;
-  unsigned char buf[8];
+unsigned char len = 0;
+unsigned char buf[8] = { 0 };
+unsigned long currTime = 0;
+void loop() 
+{
   if(CAN_MSGAVAIL == CAN.checkReceive())            // check if data coming
   {
-      CAN.readMsgBuf(&len, buf);    // read data,  len: data length, buf: data buf
-      unsigned long canId = CAN.getCanId();
-      unsigned char isExt = CAN.isExtendedFrame();
-      Serial.println("-----------------------------");
-      Serial.printf("Ext: %d Get data from ID: ", isExt);
-      Serial.println(canId, HEX);
-
-      memcpy(&buffSend[0], &canId, 4);
-      memcpy(&buffSend[4], &len, 1);
-      memcpy(&buffSend[5], &buf, 8);
-      client.write((uint8_t *)buffSend, 13);
-
-      for(int i = 0; i<len; i++)    // print the data
+      /* Copy msg to buffer */
+      if(captured_n < BUFF_LEN)
       {
-          Serial.print(buf[i], HEX);
-          Serial.print("\t");
+        canMsg[captured_n].id = CAN.getCanId();
+        canMsg[captured_n].ext = CAN.isExtendedFrame();
+        CAN.readMsgBuf(&canMsg[captured_n].len, canMsg[captured_n].data);
+        captured_n++;
       }
-      Serial.println();
+  }
+  if(millis() >= currTime + 1000)
+  {
+    currTime = millis();
+    for(int i = 0; i < captured_n; i++)
+    {
+      memcpy(&buffSend[0], &canMsg[i].id, 4);
+      memcpy(&buffSend[4], &canMsg[i].len, 1);
+      memcpy(&buffSend[5], canMsg[i].data, 8);
+      client.write((uint8_t *)buffSend, 13);
+    }
+    Serial.printf("Received %d messages.\n", captured_n);
+    client.flush();
+    memset(canMsg, 0x00, sizeof(canMsg_t)*BUFF_LEN);
+    captured_n = 0;
   }
 }
