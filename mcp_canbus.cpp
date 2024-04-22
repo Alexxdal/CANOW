@@ -778,12 +778,7 @@ byte MCP_CAN::clearMsg()
     ext_flg     = 0;
     rtr         = 0;
     filhit      = 0;
-
-    for(int i = 0; i<dta_len; i++)
-    {
-        dta[i] = 0x00;
-    }
-
+    memset(&dta, 0x00, dta_len);
     return MCP2515_OK;
 }
 
@@ -883,16 +878,14 @@ byte MCP_CAN::readMsg()
 byte MCP_CAN::readMsgBuf(byte *len, byte buf[])
 {
     byte  rc;
-
     rc = readMsg();
-
-    if(rc == CAN_OK) {
-        *len = dta_len;
-        for(int i = 0; i<dta_len; i++)
-        {
-            buf[i] = dta[i];
-        }
-    } else {
+    if(rc == CAN_OK)
+    {
+      *len = dta_len;
+      memcpy(&buf, &dta, dta_len);
+    } 
+    else
+    {
         *len = 0;
     }
     return rc;
