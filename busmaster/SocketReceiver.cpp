@@ -89,25 +89,27 @@ void OnDLL_Load() {
     char recvbuf[DEFAULT_BUFLEN];
 	
 	int yes = 1;
-	int resultt = setsockopt(new_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(int));    // 1 - on, 0 - off
-	
+	int result = setsockopt(new_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(int));    // 1 - on, 0 - off
+	#define CANMSG_LEN 14
     do {
       rxLen = recv(new_socket, recvbuf, DEFAULT_BUFLEN, 0);
-      if (rxLen >= 4) {
-		STCAN_MSG canMsg;
-		/* Clean */
-		canMsg.id = 0;
-		canMsg.isExtended = 0;
-		canMsg.dlc = 0;
-		memset(&canMsg.data, 0x00, 8);
-		/* Primi 4 Byte: ID */
-		memcpy(&canMsg.id, &recvbuf[0], 4);
-		memcpy(&canMsg.isExtended, &recvbuf[4], 1);
-		memcpy(&canMsg.dlc, &recvbuf[5], 1);
-		memcpy(&canMsg.data, &recvbuf[6], canMsg.dlc);
-        Trace("Received %d", canMsg.id);
-		SendMsg(canMsg);
-      }
+	  if( rxLen % CANMSG_LEN == 0 )
+	  {
+		Trace("Received %d messages.", rxLen/CANMSG_LEN);
+		/* Received correct buffer len */
+		for(int i = 0; i < rxLen; i+=CANMSG_LEN)
+		{
+			STCAN_MSG canMsg;
+			/* Clean */
+			memset(&canMsg.data, 0x00, 8);
+			/* Primi 4 Byte: ID */
+			memcpy(&canMsg.id, &recvbuf[i], 4);
+			memcpy(&canMsg.isExtended, &recvbuf[i+4], 1);
+			memcpy(&canMsg.dlc, &recvbuf[i+5], 1);
+			memcpy(&canMsg.data, &recvbuf[i+6], canMsg.dlc);
+			SendMsg(canMsg);
+		}
+	  }
     } while (rxLen > 0);
     Trace("Connection closed\n");
   }
