@@ -32,8 +32,25 @@ extern "C" {
 #undef CONFIG_LWIP_TCPIP_RECVMBOX_SIZE
 #define CONFIG_LWIP_TCPIP_RECVMBOX_SIZE 1024
 #endif
-
 }
+
+/* MCP2515 SPI PINS */
+#define HSPI_MISO 12
+#define HSPI_MOSI 13
+#define HSPI_SCLK 14
+#define HSPI_CS   15
+/* Socket RX buffer len */
+#define TCP_RX_BUF_LEN 128
+/* CAN Messages memory buffer len */
+#define CAN_BUFF_LEN 200
+uint8_t rxBuff[TCP_RX_BUF_LEN] = { 0 };
+
+typedef struct __attribute((packed)){
+  unsigned int id;
+  unsigned char ext;
+  unsigned char len;
+  unsigned char data[8];
+} canMsg_t;
 
 /* Wifi Access Point Info */
 const char* ssid     = "CANOW";
@@ -42,16 +59,11 @@ const char* password = "CANOW1234";
 /* TCP Client */
 WiFiClient client;
 
-/* MCP2515 SPI PINS */
-#define HSPI_MISO 12
-#define HSPI_MOSI 13
-#define HSPI_SCLK 14
-#define HSPI_CS   15
-
 /* Init CAN Library */
 MCP_CAN CAN(HSPI_CS);  
 
 void setup() {
+  /* Init Serial port */
   Serial.begin(115200);
 
   /* Start WiFi SoftAP */
@@ -60,9 +72,6 @@ void setup() {
   esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_BW_HT40);
   esp_wifi_config_80211_tx_rate(WIFI_IF_AP, WIFI_PHY_RATE_MCS7_SGI);
   WiFi.setTxPower(WIFI_POWER_19_5dBm);
-
-  wifi_config_t currentConf = { 0 };
-  esp_wifi_get_config(WIFI_IF_AP, &currentConf);
 
   /* Init MCP2515 */
   while (CAN_OK != CAN.begin(CAN_125KBPS))
@@ -81,25 +90,18 @@ void setup() {
   Serial.println("Connected to Host");
 }
 
-typedef struct __attribute((packed)){
-  unsigned int id;
-  unsigned char ext;
-  unsigned char len;
-  unsigned char data[8];
-} canMsg_t;
-
-#define BUFF_LEN 200
 uint16_t captured_n = 0;
-canMsg_t canMsg[BUFF_LEN] = { 0 };
+canMsg_t canMsg[CAN_BUFF_LEN] = { 0 };
 unsigned char buffSend[14] = { 0 };
 unsigned long currTime = 0;
+int rxLen = 0;
 void loop() 
 {
   /* check if data coming */
   if(CAN_MSGAVAIL == CAN.checkReceive())
   {
       /* Copy msg to buffer */
-      if(captured_n < BUFF_LEN)
+      if(captured_n < CAN_BUFF_LEN)
       {
         canMsg[captured_n].id = CAN.getCanId();
         canMsg[captured_n].ext = CAN.isExtendedFrame();
@@ -112,7 +114,27 @@ void loop()
   {
     currTime = millis();
     client.write((uint8_t*)canMsg, sizeof(canMsg_t)*captured_n);
-    memset(canMsg, 0x00, sizeof(canMsg_t)*BUFF_LEN);
+    memset(canMsg, 0x00, sizeof(canMsg_t)*CAN_BUFF_LEN);
     captured_n = 0;
+  }
+  /* Check incoming data from socket */
+  rxLen = client.read(rxBuff, TCP_RX_BUF_LEN);
+  if(rxLen > 4)
+  {
+    uint32_t canid = 0;
+    uint8_t ext = 0;
+    uint8_t len = 0;
+    uint8_t data[8] = { 0 };
+    memcpy(&canid, &rxBuff[0], 4);
+    memcpy(&ext, &rxBuff[4], 1);
+    memcpy(&len, &rxBuff[5], 1);
+    memcpy(data, &rxBuff[6], len);
+    CAN.sendMsgBuf(canid, ext, len, data);
+    /*Serial.printf("Sent message with ID: %d.\tEXT: %d\tLEN: %d\n", canid, ext, len);
+    for(int i = 0; i < len; i++)
+    {
+      Serial.printf("%02X", data[i]);
+    }
+    Serial.printf("\n");*/
   }
 }
