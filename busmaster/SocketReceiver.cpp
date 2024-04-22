@@ -49,7 +49,7 @@ void OnDLL_Load() {
   Trace("Initialised.\n");
 
   // Create a socket
-  if ((s = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+  if ((s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
     Trace("Could not create socket : %d", WSAGetLastError());
     return;
   }
@@ -87,6 +87,9 @@ void OnDLL_Load() {
 
     int rxLen;
     char recvbuf[DEFAULT_BUFLEN];
+	
+	int yes = 1;
+	int resultt = setsockopt(new_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(int));    // 1 - on, 0 - off
 	
     do {
       rxLen = recv(new_socket, recvbuf, DEFAULT_BUFLEN, 0);
