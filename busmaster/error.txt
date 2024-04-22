@@ -1,0 +1,4 @@
+C:/Users/ALESSA~1.D'A/DOCUME~1/CANOW/BUSMAS~1/SOCKET~1.CPP: In function 'void OnDLL_Load()':
+C:/Users/ALESSA~1.D'A/DOCUME~1/CANOW/BUSMAS~1/SOCKET~1.CPP:92:6: warning: unused variable 'result' [-Wunused-variable]
+  int result = setsockopt(new_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(int));    // 1 - on, 0 - off
+      ^

@@ -8,9 +8,9 @@ CXXFLAGS = -Wall -c
 
 dll = SocketReceiver.dll
 
-DBOBJFILE = 
+DBOBJFILE = "C:\ProgramData\BUSMASTER\General\DBCache\31BD_gcc4.8.1.obj" 
 
-DBINCLUDES = 
+DBINCLUDES = -include"C:\ProgramData\BUSMASTER\General\DBCache\31BD.h" 
 
 
 all: $(dll)

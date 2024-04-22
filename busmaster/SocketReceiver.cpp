@@ -129,13 +129,12 @@ void OnDLL_Unload() {
 
 /* Start BUSMASTER generated function - OnMsg_All */
 void OnMsg_All(STCAN_MSG RxMsg) {
-  /*int msg_len = 4 + 1 + RxMsg.dlc;
-  char send_buff[msg_len];
-  RxMsg.id = SwapEndian32(RxMsg.id);
-  memcpy(send_buff, &RxMsg.id, 4);
-  send_buff[4] = RxMsg.dlc;
-  memcpy(&send_buff[5], &RxMsg.data[0], RxMsg.dlc);
-  send(new_socket, send_buff, msg_len, 0);*/
+	char msg[CANMSG_LEN] = { 0 };
+	memcpy(&msg[0], &RxMsg.id, 4);
+	memcpy(&msg[4], &RxMsg.isExtended, 1);
+	memcpy(&msg[5], &RxMsg.dlc, 1);
+	memcpy(&msg[6], &RxMsg.data, 8);
+	send(new_socket, (const char*)&msg, CANMSG_LEN, 0);
 } /* End BUSMASTER generated function - OnMsg_All */
 
 
