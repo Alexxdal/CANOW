@@ -20,17 +20,17 @@ extern "C" {
 
 #ifdef CONFIG_ESP32_WIFI_STATIC_RX_BUFFER_NUM
 #undef CONFIG_ESP32_WIFI_STATIC_RX_BUFFER_NUM
-#define CONFIG_ESP32_WIFI_STATIC_RX_BUFFER_NUM 25
+#define CONFIG_ESP32_WIFI_STATIC_RX_BUFFER_NUM 20
 #endif
 
 #ifdef CONFIG_ESP32_WIFI_DYNAMIC_RX_BUFFER_NUM
 #undef CONFIG_ESP32_WIFI_DYNAMIC_RX_BUFFER_NUM
-#define CONFIG_ESP32_WIFI_DYNAMIC_RX_BUFFER_NUM 64
+#define CONFIG_ESP32_WIFI_DYNAMIC_RX_BUFFER_NUM 32
 #endif
 
 #ifdef CONFIG_LWIP_TCPIP_RECVMBOX_SIZE
 #undef CONFIG_LWIP_TCPIP_RECVMBOX_SIZE
-#define CONFIG_LWIP_TCPIP_RECVMBOX_SIZE 1024
+#define CONFIG_LWIP_TCPIP_RECVMBOX_SIZE 16
 #endif
 }
 
@@ -42,11 +42,11 @@ extern "C" {
 /* Socket RX buffer len */
 #define TCP_RX_BUF_LEN 128
 /* CAN Messages memory buffer len */
-#define CAN_BUFF_LEN 200
+#define CAN_BUFF_LEN 100
 uint8_t rxBuff[TCP_RX_BUF_LEN] = { 0 };
 
 typedef struct __attribute((packed)){
-  unsigned int id;
+  unsigned long id;
   unsigned char ext;
   unsigned char len;
   unsigned char data[8];
@@ -74,7 +74,7 @@ void setup() {
   WiFi.setTxPower(WIFI_POWER_19_5dBm);
 
   /* Init MCP2515 */
-  while (CAN_OK != CAN.begin(CAN_125KBPS))
+  while (CAN_OK != CAN.begin(CAN_500KBPS))
   {
       Serial.println("CAN BUS FAIL!");
       delay(500);
@@ -92,7 +92,6 @@ void setup() {
 
 uint16_t captured_n = 0;
 canMsg_t canMsg[CAN_BUFF_LEN] = { 0 };
-unsigned char buffSend[14] = { 0 };
 unsigned long currTime = 0;
 int rxLen = 0;
 void loop() 
@@ -103,38 +102,40 @@ void loop()
       /* Copy msg to buffer */
       if(captured_n < CAN_BUFF_LEN)
       {
-        canMsg[captured_n].id = CAN.getCanId();
         canMsg[captured_n].ext = CAN.isExtendedFrame();
-        CAN.readMsgBuf(&canMsg[captured_n].len, canMsg[captured_n].data);
+        CAN.readMsgBufID(&canMsg[captured_n].id, &canMsg[captured_n].len, (uint8_t*)&canMsg[captured_n].data);
         captured_n++;
       }
   }
   /* Send captured message to socket */
-  if(millis() >= currTime + 100)
+  if(millis() >= currTime + 50)
   {
     currTime = millis();
-    client.write((uint8_t*)canMsg, sizeof(canMsg_t)*captured_n);
-    memset(canMsg, 0x00, sizeof(canMsg_t)*CAN_BUFF_LEN);
-    captured_n = 0;
-  }
-  /* Check incoming data from socket */
-  rxLen = client.read(rxBuff, TCP_RX_BUF_LEN);
-  if(rxLen > 4)
-  {
-    uint32_t canid = 0;
-    uint8_t ext = 0;
-    uint8_t len = 0;
-    uint8_t data[8] = { 0 };
-    memcpy(&canid, &rxBuff[0], 4);
-    memcpy(&ext, &rxBuff[4], 1);
-    memcpy(&len, &rxBuff[5], 1);
-    memcpy(data, &rxBuff[6], len);
-    CAN.sendMsgBuf(canid, ext, len, data);
-    /*Serial.printf("Sent message with ID: %d.\tEXT: %d\tLEN: %d\n", canid, ext, len);
-    for(int i = 0; i < len; i++)
+    if(client.connected())
     {
-      Serial.printf("%02X", data[i]);
+      client.write((uint8_t*)canMsg, sizeof(canMsg_t)*captured_n);
+      captured_n = 0;
+
+      /* Check incoming data from socket */
+      rxLen = client.read(rxBuff, TCP_RX_BUF_LEN);
+      if(rxLen > 10)
+      {
+        uint32_t canid = 0;
+        uint8_t ext = 0;
+        uint8_t len = 0;
+        uint8_t data[8] = { 0 };
+        memcpy(&canid, &rxBuff[0], 4);
+        memcpy(&ext, &rxBuff[4], 1);
+        memcpy(&len, &rxBuff[5], 1);
+        memcpy(data, &rxBuff[6], len);
+        CAN.sendMsgBuf(canid, ext, len, data);
+        /*Serial.printf("Sent message with ID: %d.\tEXT: %d\tLEN: %d\n", canid, ext, len);
+        for(int i = 0; i < len; i++)
+        {
+          Serial.printf("%02X", data[i]);
+        }
+        Serial.printf("\n");*/
+      }
     }
-    Serial.printf("\n");*/
-  }
+  } 
 }
