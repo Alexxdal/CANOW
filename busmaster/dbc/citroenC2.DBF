@@ -1,0 +1,15 @@
+//******************************BUSMASTER Messages and signals Database ******************************//
+
+[DATABASE_VERSION] 1.3
+
+[PROTOCOL] CAN
+
+[BUSMASTER_VERSION] [3.2.2]
+
+[NUMBER_OF_MESSAGES] 2
+
+[START_MSG] DASHBOARD_LIGHTS,296,8,0,1,S
+[END_MSG]
+
+[START_MSG] BSI_TACHO_SPEED_OD_FUEL,182,8,0,1,S
+[END_MSG]
