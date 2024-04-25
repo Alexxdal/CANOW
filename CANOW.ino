@@ -74,7 +74,7 @@ void setup() {
   WiFi.setTxPower(WIFI_POWER_19_5dBm);
 
   /* Init MCP2515 */
-  while (CAN_OK != CAN.begin(CAN_500KBPS))
+  while (CAN_OK != CAN.begin(CAN_125KBPS))
   {
       Serial.println("CAN BUS FAIL!");
       delay(500);
@@ -136,6 +136,16 @@ void loop()
         }
         Serial.printf("\n");*/
       }
+    }
+    else
+    {
+      /* Connect to server */
+      while(!client.connect(IPAddress(192,168,4,2), 11666)){
+        Serial.println("Connection to host failed");
+        delay(1000);
+      }
+      client.setNoDelay(true);
+      Serial.println("Connected to Host");
     }
   } 
 }
