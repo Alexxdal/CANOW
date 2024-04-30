@@ -80,6 +80,55 @@ void setup() {
       delay(500);
   }
   Serial.println("CAN BUS OK!");
+  Serial.println("CAN Autobaud started...");
+  
+  uint8_t baudRateTest[] = { CAN_100KBPS, CAN_125KBPS, CAN_200KBPS, CAN_250KBPS, CAN_500KBPS, CAN_1000KBPS };
+  while(true)
+  {
+    for(int i = 0; i < sizeof(baudRateTest); i++)
+    {
+      /* Change baud */
+      while (CAN_OK != CAN.begin(baudRateTest[i])){}
+      /* Check if we can receive some messages */
+      uint8_t autobaud_counter = 0;
+      for(uint8_t i = 0; i < 5; i++){
+        if(CAN_MSGAVAIL == CAN.checkReceive())
+        {
+          autobaud_counter++;
+        }
+      }
+      /* Messages received */
+      if(autobaud_counter > 0)
+      {
+        switch(baudRateTest[i])
+        {
+          case CAN_100KBPS:
+            Serial.println("Baudrate 100Kbps.");
+            break;
+          case CAN_125KBPS:
+            Serial.println("Baudrate 125Kbps.");
+            break;
+          case CAN_200KBPS:
+            Serial.println("Baudrate 200Kbps.");
+            break;
+          case CAN_250KBPS:
+            Serial.println("Baudrate 250Kbps.");
+            break;
+          case CAN_500KBPS:
+            Serial.println("Baudrate 500Kbps.");
+            break;
+          case CAN_1000KBPS:
+            Serial.println("Baudrate 1000Kbps.");
+            break;
+          default:
+            Serial.println("Baudrate unknown.");
+            break;
+        }
+        break;
+      }
+    }
+  }
+  
 
   /* Connect to server */
   while(!client.connect(IPAddress(192,168,4,2), 11666)){
